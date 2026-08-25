@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.api.routes.recipient_sites import router as recipient_sites_router
 from app.core.config import get_settings
 from app.db.session import get_db
 
@@ -16,6 +17,11 @@ app = FastAPI(
     description="Equitable food rescue delivery recommendation system.",
     version="0.1.0",
     debug=settings.debug,
+)
+
+app.include_router(
+    recipient_sites_router,
+    prefix="/api/v1",
 )
 
 
