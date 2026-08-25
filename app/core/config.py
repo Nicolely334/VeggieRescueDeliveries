@@ -9,8 +9,7 @@ class Settings(BaseSettings):
     app_environment: Literal["development", "test", "production"] = "development"
     debug: bool = False
     database_url: str = (
-        "postgresql+psycopg://veggie_rescue:veggie_rescue"
-        "@localhost:5432/veggie_rescue"
+        "postgresql+psycopg://veggie_rescue:veggie_rescue@localhost:5432/veggie_rescue"
     )
 
     model_config = SettingsConfigDict(
