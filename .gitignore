@@ -17,3 +17,6 @@ htmlcov/
 
 # macOS
 .DS_Store
+
+data/raw/
+data/reports/
