@@ -68,10 +68,9 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.CheckConstraint(
-            "\n            status IN (\n                'pending',\n                'needs_review',\n                'approved',\n                'rejected',\n                'imported'\n            )\n            ",
+            "\n            status IN (\n                'pending',\n                'needs_review',\n                'approved',\n                'rejected',\n                'imported'\n            )\n            ",  # noqa: E501
             name=op.f("ck_import_rows_valid_status"),
-        ),
-        sa.ForeignKeyConstraint(
+        ),        sa.ForeignKeyConstraint(
             ["batch_id"],
             ["import_batches.id"],
             name=op.f("fk_import_rows_batch_id_import_batches"),
