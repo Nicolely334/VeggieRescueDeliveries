@@ -2,50 +2,39 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Sparkles, 
-  Truck, 
-  Users, 
-  ClipboardList 
-} from 'lucide-react';
-
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Priorities', href: '/priorities', icon: Sparkles },
-  { name: 'Deliveries', href: '/deliveries', icon: Truck },
-  { name: 'Recipients', href: '/recipients', icon: Users },
-  { name: 'Driver Intake', href: '/driver', icon: ClipboardList },
+  { name: 'Dashboard', href: '/dashboard' },
+  { name: 'Priorities', href: '/priorities' },
+  { name: 'Deliveries', href: '/deliveries' },
+  { name: 'Recipients', href: '/recipients' },
+  { name: 'Driver Intake', href: '/driver' },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 border-r border-slate-200 bg-white min-h-screen flex flex-col p-4">
-      <div className="px-3 py-4 mb-4">
-        <h1 className="text-xl font-bold tracking-tight text-emerald-600">
-          VeggieRescue
+    <aside className="hidden w-[203px] shrink-0 border-r border-[#969696] bg-white p-4 sm:flex sm:min-h-screen sm:flex-col">
+      <div className="mb-7 px-0 py-2">
+        <h1 className="text-[17px] font-normal leading-[1.15] tracking-[-0.2px] text-[#151515]">
+          Veggie Rescue<br />Delivery
         </h1>
-        <p className="text-xs text-slate-500">Distribution Platform</p>
       </div>
 
-      <nav className="space-y-1 flex-1">
+      <nav className="flex-1 space-y-5">
         {navigation.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-          const Icon = item.icon;
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`block px-0 text-[14px] font-normal transition-colors ${
                 isActive
-                  ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'text-[#151515]'
+                  : 'text-[#151515] hover:text-[#666]'
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0" />
-              {item.name}
+              {item.name === 'Priorities' ? 'All Deliveries' : item.name === 'Deliveries' ? 'Profiles' : item.name === 'Recipients' ? 'Food Intake' : item.name === 'Driver Intake' ? 'Delivery Queue' : item.name}
             </Link>
           );
         })}
