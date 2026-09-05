@@ -1,4 +1,5 @@
 import { ArrowRight, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 import { RecordIntakeDialog } from "@/src/components/RecordIntakeDialog";
 
 const priorities = [
@@ -82,7 +83,7 @@ export default function Home() {
         </section>
 
         <section>
-          <div className="mb-[14px] flex items-center justify-between"><h2 className="text-[18px] font-normal">Today’s Deliveries</h2><button className="rounded-full bg-[#202020] px-[22px] py-[7px] text-[14px] text-white">View All</button></div>
+          <div className="mb-[14px] flex items-center justify-between"><h2 className="text-[18px] font-normal">Today’s Deliveries</h2><Link href="/priorities" className="rounded-full bg-[#202020] px-[22px] py-[7px] text-[14px] text-white">View All</Link></div>
           <DashboardTable headers={["Recipient", "Produce", "Packaged", "Driver", "Vehicle", "Status"]} rows={deliveries} />
         </section>
       </main>

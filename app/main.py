@@ -1,11 +1,13 @@
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.routes.recipient_sites import router as recipient_sites_router
+from app.api.routes.deliveries import router as deliveries_router
 from app.core.config import get_settings
 from app.db.session import get_db
 
@@ -19,8 +21,22 @@ app = FastAPI(
     debug=settings.debug,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
 app.include_router(
     recipient_sites_router,
+    prefix="/api/v1",
+)
+app.include_router(
+    deliveries_router,
     prefix="/api/v1",
 )
 
