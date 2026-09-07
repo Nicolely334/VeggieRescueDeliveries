@@ -57,16 +57,14 @@ def test_incorrect_total_is_flagged() -> None:
         is_possible_duplicate=False,
     )
 
-    assert any(
-        issue.startswith("food amount sum")
-        for issue in issues
-    )
+    assert any(issue.startswith("food amount sum") for issue in issues)
 
 
-def test_legacy_food_column_is_flagged() -> None:
+def test_dairy_and_other_are_valid_food_categories() -> None:
     raw_data = valid_raw_data()
     raw_data["I"] = 25
-    raw_data["P"] = 125
+    raw_data["N"] = 5
+    raw_data["P"] = 130
 
     issues = find_row_issues(
         raw_data=raw_data,
@@ -74,10 +72,7 @@ def test_legacy_food_column_is_flagged() -> None:
         is_possible_duplicate=False,
     )
 
-    assert (
-        "unlabeled legacy column I contains weight"
-        in issues
-    )
+    assert issues == []
 
 
 def test_duplicate_delivery_is_flagged() -> None:
@@ -97,8 +92,4 @@ def test_business_signature_ignores_source_id() -> None:
     second_row = valid_raw_data()
     second_row["R"] = "source-two"
 
-    assert calculate_business_signature(
-        first_row
-    ) == calculate_business_signature(
-        second_row
-    )
+    assert calculate_business_signature(first_row) == calculate_business_signature(second_row)
