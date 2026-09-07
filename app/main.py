@@ -7,8 +7,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.routes.deliveries import router as deliveries_router
-from app.api.routes.delivery_queue import router as delivery_queue_router
-from app.api.routes.recipient_sites import router as recipient_sites_router
+from app.api.routes.delivery_queue import (
+    router as delivery_queue_router,
+)
+from app.api.routes.donation_offers import (
+    router as donation_offers_router,
+)
+from app.api.routes.farms import router as farms_router
+from app.api.routes.recipient_sites import (
+    router as recipient_sites_router,
+)
 from app.core.config import get_settings
 from app.db.session import get_db
 
@@ -17,7 +25,7 @@ DatabaseSession = Annotated[Session, Depends(get_db)]
 
 app = FastAPI(
     title=settings.app_name,
-    description="Equitable food rescue delivery recommendation system.",
+    description=("Equitable food rescue delivery recommendation system."),
     version="0.1.0",
     debug=settings.debug,
 )
@@ -28,7 +36,10 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ],
-    allow_methods=["GET"],
+    allow_methods=[
+        "GET",
+        "POST",
+    ],
     allow_headers=["*"],
 )
 
@@ -39,6 +50,16 @@ app.include_router(
 
 app.include_router(
     deliveries_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    donation_offers_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    farms_router,
     prefix="/api/v1",
 )
 
@@ -57,12 +78,14 @@ async def health_check() -> dict[str, str]:
 
 
 @app.get("/health/database", tags=["system"])
-def database_health_check(db: DatabaseSession) -> dict[str, str]:
+def database_health_check(
+    db: DatabaseSession,
+) -> dict[str, str]:
     try:
         db.execute(text("SELECT 1")).scalar_one()
     except SQLAlchemyError as exc:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=(status.HTTP_503_SERVICE_UNAVAILABLE),
             detail="Database unavailable",
         ) from exc
 
