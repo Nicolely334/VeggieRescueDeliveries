@@ -11,6 +11,10 @@ from app.models.recipient_food_preference import (
     RecipientFoodPreference,
 )
 from app.models.recipient_site import RecipientSite
+from app.models.recommendation_candidate import (
+    RecommendationCandidate,
+)
+from app.models.recommendation_run import RecommendationRun
 
 __all__ = [
     "Delivery",
@@ -24,4 +28,6 @@ __all__ = [
     "RecipientAlias",
     "RecipientFoodPreference",
     "RecipientSite",
+    "RecommendationCandidate",
+    "RecommendationRun",
 ]
