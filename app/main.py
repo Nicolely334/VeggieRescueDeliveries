@@ -14,6 +14,12 @@ from app.api.routes.donation_offers import (
     router as donation_offers_router,
 )
 from app.api.routes.farms import router as farms_router
+from app.api.routes.food_categories import (
+    router as food_categories_router,
+)
+from app.api.routes.recipient_food_preferences import (
+    router as recipient_food_preferences_router,
+)
 from app.api.routes.recipient_sites import (
     router as recipient_sites_router,
 )
@@ -39,6 +45,7 @@ app.add_middleware(
     allow_methods=[
         "GET",
         "POST",
+        "PUT",
     ],
     allow_headers=["*"],
 )
@@ -60,6 +67,16 @@ app.include_router(
 
 app.include_router(
     farms_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    food_categories_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    recipient_food_preferences_router,
     prefix="/api/v1",
 )
 
