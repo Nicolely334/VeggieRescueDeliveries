@@ -38,11 +38,7 @@ def list_deliveries(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> DeliveryListRead:
-    if (
-        date_from is not None
-        and date_to is not None
-        and date_from > date_to
-    ):
+    if date_from is not None and date_to is not None and date_from > date_to:
         raise HTTPException(
             status_code=422,
             detail="date_from cannot be later than date_to",
@@ -51,23 +47,15 @@ def list_deliveries(
     filters = []
 
     if recipient_site_id is not None:
-        filters.append(
-            Delivery.recipient_site_id == recipient_site_id
-        )
+        filters.append(Delivery.recipient_site_id == recipient_site_id)
 
     if date_from is not None:
-        filters.append(
-            Delivery.delivery_date >= date_from
-        )
+        filters.append(Delivery.delivery_date >= date_from)
 
     if date_to is not None:
-        filters.append(
-            Delivery.delivery_date <= date_to
-        )
+        filters.append(Delivery.delivery_date <= date_to)
 
-    total = db.scalar(
-        select(func.count(Delivery.id)).where(*filters)
-    ) or 0
+    total = db.scalar(select(func.count(Delivery.id)).where(*filters)) or 0
 
     delivery_rows = db.execute(
         select(
@@ -87,10 +75,7 @@ def list_deliveries(
         .offset(offset)
     ).all()
 
-    delivery_ids = [
-        delivery.id
-        for delivery, _recipient_name in delivery_rows
-    ]
+    delivery_ids = [delivery.id for delivery, _recipient_name in delivery_rows]
 
     items_by_delivery: dict[
         uuid.UUID,
@@ -111,12 +96,9 @@ def list_deliveries(
             )
             .join(
                 FoodCategory,
-                FoodCategory.code
-                == DeliveryItem.food_category_code,
+                FoodCategory.code == DeliveryItem.food_category_code,
             )
-            .where(
-                DeliveryItem.delivery_id.in_(delivery_ids)
-            )
+            .where(DeliveryItem.delivery_id.in_(delivery_ids))
             .order_by(
                 DeliveryItem.delivery_id,
                 FoodCategory.name,
@@ -138,9 +120,7 @@ def list_deliveries(
                     pounds=pounds_value,
                 )
             )
-            weights_by_delivery[delivery_id][
-                category_code
-            ] = pounds_value
+            weights_by_delivery[delivery_id][category_code] = pounds_value
 
     deliveries: list[DeliveryRead] = []
 
@@ -163,9 +143,7 @@ def list_deliveries(
                 vehicle=delivery.vehicle_name or "",
                 total_pounds=float(delivery.total_pounds),
                 items=items_by_delivery.get(delivery.id, []),
-                source_recipient_name=(
-                    delivery.source_recipient_name
-                ),
+                source_recipient_name=(delivery.source_recipient_name),
                 created_at=delivery.created_at,
                 status="completed",
             )
