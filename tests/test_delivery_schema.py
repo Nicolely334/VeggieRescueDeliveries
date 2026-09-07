@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from app.schemas.delivery import (
     DeliveryItemRead,
@@ -28,7 +28,7 @@ def test_delivery_list_schema() -> None:
             )
         ],
         source_recipient_name="Unity Shoppe",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         status="completed",
     )
 
@@ -40,8 +40,6 @@ def test_delivery_list_schema() -> None:
     )
 
     assert response.total == 1
-    assert response.deliveries[0].recipient == (
-        "Unity Shoppe - SB"
-    )
+    assert response.deliveries[0].recipient == ("Unity Shoppe - SB")
     assert response.deliveries[0].produce_pounds == 125
     assert response.deliveries[0].items[0].pounds == 125

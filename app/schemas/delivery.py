@@ -1,56 +1,35 @@
-(.venv) nicolely@Mac VeggieRescueDeliveries % git show :2:app/api/routes/deliveries.py | sed -n '1,240p'
+import uuid
 from datetime import date, datetime
+from typing import Literal
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-
-from app.db.session import get_db
-from app.models.import_row import ImportRow
-from app.schemas.delivery import DeliveryListRead, DeliveryRead
-
-router = APIRouter(prefix="/deliveries", tags=["deliveries"])
+from pydantic import BaseModel, Field
 
 
-def display_value(value: object) -> str:
-    return "" if value is None else str(value).strip()
+class DeliveryItemRead(BaseModel):
+    category_code: str
+    category_name: str
+    pounds: float = Field(ge=0)
 
 
-def numeric_value(value: object) -> float | None:
-    if value is None or value == "":
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
+class DeliveryRead(BaseModel):
+    id: uuid.UUID
+    recipient_site_id: uuid.UUID
+    delivery_date: date
+    recipient: str
+    location: str
+    produce_pounds: float | None
+    packaged_pounds: float | None
+    driver: str
+    vehicle: str
+    total_pounds: float = Field(ge=0)
+    items: list[DeliveryItemRead]
+    source_recipient_name: str | None
+    created_at: datetime
+    status: Literal["completed"]
 
 
-def sort_key(delivery: DeliveryRead) -> tuple[date, str]:
-    try:
-        parsed_date = datetime.fromisoformat(delivery.delivery_date).date()
-    except ValueError:
-        parsed_date = date.min
-    return parsed_date, delivery.recipient.lower()
-
-
-@router.get("", response_model=DeliveryListRead)
-def list_deliveries(db: Session = Depends(get_db)) -> DeliveryListRead:
-    rows = db.scalars(
-        select(ImportRow).where(ImportRow.status != "rejected")
-    ).all()
-    deliveries = [
-        DeliveryRead(
-            id=str(row.id),
-            delivery_date=display_value(row.raw_data.get("B")),
-            recipient=display_value(row.raw_data.get("C")),
-            location=display_value(row.raw_data.get("D")),
-            produce_pounds=numeric_value(row.raw_data.get("G")),
-            packaged_pounds=numeric_value(row.raw_data.get("H")),
-            driver=display_value(row.raw_data.get("E")),
-            vehicle=display_value(row.raw_data.get("F")),
-            status=row.status,
-        )
-        for row in rows
-    ]
-    deliveries.sort(key=sort_key, reverse=True)
-    return DeliveryListRead(total=len(deliveries), deliveries=deliveries)%   
+class DeliveryListRead(BaseModel):
+    total: int = Field(ge=0)
+    deliveries: list[DeliveryRead]
+    limit: int = Field(ge=1)
+    offset: int = Field(ge=0)
