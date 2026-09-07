@@ -82,10 +82,7 @@ def test_matches_are_sorted_by_food_category() -> None:
         },
     )
 
-    assert [
-        match.food_category_code
-        for match in matches
-    ] == [
+    assert [match.food_category_code for match in matches] == [
         "bread",
         "produce",
     ]

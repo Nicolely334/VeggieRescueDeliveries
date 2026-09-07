@@ -23,10 +23,7 @@ def match_donation_food(
     offered_pounds_by_category: Mapping[str, Decimal],
     maximum_pounds_by_category: Mapping[str, Decimal | None],
 ) -> list[DonationFoodMatch]:
-    matching_category_codes = (
-        offered_pounds_by_category.keys()
-        & maximum_pounds_by_category.keys()
-    )
+    matching_category_codes = offered_pounds_by_category.keys() & maximum_pounds_by_category.keys()
 
     matches: list[DonationFoodMatch] = []
 

@@ -10,6 +10,9 @@ from app.api.routes.deliveries import router as deliveries_router
 from app.api.routes.delivery_queue import (
     router as delivery_queue_router,
 )
+from app.api.routes.donation_delivery_queue import (
+    router as donation_delivery_queue_router,
+)
 from app.api.routes.donation_offers import (
     router as donation_offers_router,
 )
@@ -57,6 +60,10 @@ app.include_router(
 
 app.include_router(
     deliveries_router,
+    prefix="/api/v1",
+)
+app.include_router(
+    donation_delivery_queue_router,
     prefix="/api/v1",
 )
 
