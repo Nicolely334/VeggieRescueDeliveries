@@ -7,6 +7,9 @@ from app.models.food_category import FoodCategory
 from app.models.import_batch import ImportBatch
 from app.models.import_row import ImportRow
 from app.models.recipient_alias import RecipientAlias
+from app.models.recipient_food_preference import (
+    RecipientFoodPreference,
+)
 from app.models.recipient_site import RecipientSite
 
 __all__ = [
@@ -19,5 +22,6 @@ __all__ = [
     "ImportBatch",
     "ImportRow",
     "RecipientAlias",
+    "RecipientFoodPreference",
     "RecipientSite",
 ]
