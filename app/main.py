@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.routes.deliveries import router as deliveries_router
+from app.api.routes.delivery_queue import router as delivery_queue_router
 from app.api.routes.recipient_sites import router as recipient_sites_router
 from app.core.config import get_settings
 from app.db.session import get_db
@@ -29,6 +30,11 @@ app.add_middleware(
     ],
     allow_methods=["GET"],
     allow_headers=["*"],
+)
+
+app.include_router(
+    delivery_queue_router,
+    prefix="/api/v1",
 )
 
 app.include_router(
