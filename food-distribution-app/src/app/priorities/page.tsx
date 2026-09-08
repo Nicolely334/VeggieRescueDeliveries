@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Circle, Filter, RefreshCw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Filter, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type Delivery = {
@@ -16,6 +16,7 @@ type Delivery = {
 };
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const pageSize = 200;
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -36,12 +37,15 @@ export default function AllDeliveriesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
   const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`${apiUrl}/api/v1/deliveries?limit=200`, {
+    const sortOrder = sortAscending ? "oldest" : "newest";
+
+    fetch(`${apiUrl}/api/v1/deliveries?limit=${pageSize}&offset=${page * pageSize}&sort=${sortOrder}`, {
       signal: controller.signal,
       cache: "no-store",
     })
@@ -60,7 +64,7 @@ export default function AllDeliveriesPage() {
       .finally(() => setLoading(false));
 
     return () => controller.abort();
-  }, [refreshToken]);
+  }, [page, refreshToken, sortAscending]);
 
   const statuses = useMemo(() => [...new Set(deliveries.map((delivery) => delivery.status))], [deliveries]);
   const visibleDeliveries = useMemo(() => deliveries
@@ -70,6 +74,7 @@ export default function AllDeliveriesPage() {
       const result = first.delivery_date.localeCompare(second.delivery_date);
       return sortAscending ? result : -result;
     }), [deliveries, query, sortAscending, statusFilter]);
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div className="min-h-full bg-[#fcfcfc] px-5 py-6 text-[#151515] sm:px-7 lg:px-8 lg:py-7">
@@ -79,14 +84,14 @@ export default function AllDeliveriesPage() {
             <label className="flex h-9 w-[204px] items-center gap-3 rounded-[18px] border border-[#cccccc] bg-white px-4 text-[16px] text-[#343434]">
               <Search className="h-4 w-4 text-[#cfcfcf]" /><span className="sr-only">Search deliveries</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" className="w-full bg-transparent outline-none placeholder:text-[#343434]" />
             </label>
-            <button type="button" onClick={() => setSortAscending((ascending) => !ascending)} className="flex h-9 items-center gap-3 rounded-[18px] border border-[#cccccc] bg-white px-4 text-[16px] text-[#343434]"><Circle className="h-3 w-3 fill-[#d4d4d4] text-[#d4d4d4]" />Sort {sortAscending ? "↑" : "↓"}</button>
+            <label className="flex h-9 items-center gap-2 rounded-[18px] border border-[#cccccc] bg-white px-4 text-[16px] text-[#343434]"><span className="sr-only">Sort deliveries</span><select aria-label="Sort deliveries" value={sortAscending ? "oldest" : "newest"} onChange={(event) => { setLoading(true); setPage(0); setSortAscending(event.target.value === "oldest"); }} className="bg-transparent outline-none"><option value="oldest">Oldest first</option><option value="newest">Newest first</option></select></label>
             <button type="button" onClick={() => setShowFilters((visible) => !visible)} className="flex h-9 items-center gap-3 rounded-[18px] border border-[#cccccc] bg-white px-4 text-[16px] text-[#343434]"><Filter className="h-4 w-4" />Filter</button>
             {showFilters && <select aria-label="Filter by status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="h-9 rounded-[18px] border border-[#cccccc] bg-white px-3 text-[14px]"><option value="all">All statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select>}
           </div>
-          <button type="button" onClick={() => { setError(""); setLoading(true); setRefreshToken((token) => token + 1); }} disabled={loading} className="flex items-center gap-2 rounded-[18px] bg-black px-4 py-2 text-[16px] text-[#cccccc] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />Refresh</button>
+          <button type="button" onClick={() => { setError(""); setLoading(true); setPage(0); setRefreshToken((token) => token + 1); }} disabled={loading} className="flex items-center gap-2 rounded-[18px] bg-black px-4 py-2 text-[16px] text-[#cccccc] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />Refresh</button>
         </header>
 
-        {!loading && !error && <p className="mb-3 px-1 text-[13px] text-[#666]">Showing {visibleDeliveries.length} of {total} deliveries</p>}
+        {!loading && !error && <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1 text-[13px] text-[#666]"><p>Showing {page * pageSize + 1}-{Math.min((page + 1) * pageSize, total)} of {total} deliveries</p><div className="flex items-center gap-2"><button type="button" aria-label="Previous page" title="Previous page" onClick={() => { setLoading(true); setPage((currentPage) => currentPage - 1); }} disabled={page === 0} className="rounded-full border border-[#cccccc] bg-white p-1.5 disabled:cursor-not-allowed disabled:opacity-40"><ChevronLeft className="h-4 w-4" /></button><span>Page {page + 1} of {totalPages}</span><button type="button" aria-label="Next page" title="Next page" onClick={() => { setLoading(true); setPage((currentPage) => currentPage + 1); }} disabled={page + 1 >= totalPages} className="rounded-full border border-[#cccccc] bg-white p-1.5 disabled:cursor-not-allowed disabled:opacity-40"><ChevronRight className="h-4 w-4" /></button></div></div>}
 
         <div className="overflow-x-auto rounded-[15px]">
           <table className="w-full min-w-[900px] table-fixed text-[14px]">

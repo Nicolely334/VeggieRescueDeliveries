@@ -1,7 +1,7 @@
 import uuid
 from collections import defaultdict
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
@@ -37,6 +37,7 @@ def list_deliveries(
     date_to: date | None = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
+    sort: Literal["oldest", "newest"] = "newest",
 ) -> DeliveryListRead:
     if date_from is not None and date_to is not None and date_from > date_to:
         raise HTTPException(
@@ -57,6 +58,12 @@ def list_deliveries(
 
     total = db.scalar(select(func.count(Delivery.id)).where(*filters)) or 0
 
+    delivery_order = (
+        Delivery.delivery_date.asc()
+        if sort == "oldest"
+        else Delivery.delivery_date.desc()
+    )
+
     delivery_rows = db.execute(
         select(
             Delivery,
@@ -68,8 +75,8 @@ def list_deliveries(
         )
         .where(*filters)
         .order_by(
-            Delivery.delivery_date.desc(),
-            Delivery.id.desc(),
+            delivery_order,
+            Delivery.id.asc() if sort == "oldest" else Delivery.id.desc(),
         )
         .limit(limit)
         .offset(offset)
