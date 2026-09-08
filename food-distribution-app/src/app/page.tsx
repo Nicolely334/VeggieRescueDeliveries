@@ -1,5 +1,8 @@
+"use client";
+
 import { ArrowRight, TriangleAlert } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { RecordIntakeDialog } from "@/src/components/RecordIntakeDialog";
 
 const priorities = [
@@ -8,10 +11,25 @@ const priorities = [
   ["BSC - Buellton Senior Center", "4", "9 LBS", "9 LBS", "Olga", "Van", "Needs Review*"],
 ];
 
-const deliveries = [
-  ["Isla Vista Youth Projects Kitchen / Preschool", "15 LBS", "15 LBS", "Kevin", "Van", "Assigned"],
-  ["People Helping People", "15 LBS", "15 LBS", "Kevin", "Van", "Assigned"],
-];
+type Delivery = {
+  recipient: string;
+  produce_pounds: number | null;
+  packaged_pounds: number | null;
+  driver: string;
+  vehicle: string;
+  status: string;
+};
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+function getToday() {
+  const today = new Date();
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+}
+
+function formatPounds(value: number | null) {
+  return value === null ? "-" : `${value.toLocaleString()} LBS`;
+}
 
 function RecipientName({ name }: { name: string }) {
   const [firstLine, secondLine] = name.split(" Kitchen /");
@@ -46,12 +64,52 @@ function DashboardTable({ rows, headers }: { rows: string[][]; headers: string[]
 }
 
 export default function Home() {
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(true);
+  const [deliveryError, setDeliveryError] = useState(false);
+  const today = getToday();
+  const formattedToday = new Date(`${today}T00:00:00`).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(`${apiUrl}/api/v1/deliveries?date_from=${today}&date_to=${today}&limit=200&sort=newest`, {
+      signal: controller.signal,
+      cache: "no-store",
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load today's deliveries");
+        return response.json() as Promise<{ deliveries: Delivery[] }>;
+      })
+      .then((data) => setDeliveries(data.deliveries))
+      .catch((requestError: unknown) => {
+        if (requestError instanceof DOMException && requestError.name === "AbortError") return;
+        setDeliveryError(true);
+      })
+      .finally(() => setLoadingDeliveries(false));
+
+    return () => controller.abort();
+  }, [today]);
+
+  const deliveryRows = deliveries.map((delivery) => [
+    delivery.recipient,
+    formatPounds(delivery.produce_pounds),
+    formatPounds(delivery.packaged_pounds),
+    delivery.driver || "-",
+    delivery.vehicle || "-",
+    delivery.status,
+  ]);
+
   return (
     <div className="min-h-full bg-white px-5 py-6 text-[#151515] sm:px-7 lg:px-7 lg:py-6">
       <header className="border-b border-[#d6d6d6] pb-[9px]">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-[26px] font-normal leading-none tracking-[-0.5px]">Today’s Dashboard</h1>
-          <time className="text-[17px] text-[#505050]">September 2, 2026</time>
+          <time dateTime={today} className="text-[17px] text-[#505050]">{formattedToday}</time>
         </div>
       </header>
 
@@ -84,7 +142,10 @@ export default function Home() {
 
         <section>
           <div className="mb-[14px] flex items-center justify-between"><h2 className="text-[18px] font-normal">Today’s Deliveries</h2><Link href="/priorities" className="rounded-full bg-[#202020] px-[22px] py-[7px] text-[14px] text-white">View All</Link></div>
-          <DashboardTable headers={["Recipient", "Produce", "Packaged", "Driver", "Vehicle", "Status"]} rows={deliveries} />
+          {loadingDeliveries && <p className="py-8 text-center text-[13px] text-[#666]">Loading today&apos;s deliveries...</p>}
+          {!loadingDeliveries && deliveryError && <p className="py-8 text-center text-[13px] text-[#666]">Could not load today&apos;s deliveries.</p>}
+          {!loadingDeliveries && !deliveryError && deliveryRows.length === 0 && <p className="py-8 text-center text-[13px] text-[#666]">No deliveries scheduled for today.</p>}
+          {!loadingDeliveries && !deliveryError && deliveryRows.length > 0 && <DashboardTable headers={["Recipient", "Produce", "Packaged", "Driver", "Vehicle", "Status"]} rows={deliveryRows} />}
         </section>
       </main>
     </div>
