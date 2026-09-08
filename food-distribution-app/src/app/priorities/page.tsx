@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Circle, Filter, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Circle, Filter, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type Delivery = {
@@ -35,17 +35,32 @@ export default function AllDeliveriesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [total, setTotal] = useState(0);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
-    fetch(`${apiUrl}/api/v1/deliveries`)
+    const controller = new AbortController();
+
+    fetch(`${apiUrl}/api/v1/deliveries?limit=200`, {
+      signal: controller.signal,
+      cache: "no-store",
+    })
       .then((response) => {
         if (!response.ok) throw new Error("Unable to load deliveries");
-        return response.json() as Promise<{ deliveries: Delivery[] }>;
+        return response.json() as Promise<{ total: number; deliveries: Delivery[] }>;
       })
-      .then((data) => setDeliveries(data.deliveries))
-      .catch(() => setError("Could not connect to the delivery database."))
+      .then((data) => {
+        setDeliveries(data.deliveries);
+        setTotal(data.total);
+      })
+      .catch((requestError: unknown) => {
+        if (requestError instanceof DOMException && requestError.name === "AbortError") return;
+        setError("Could not connect to the delivery database.");
+      })
       .finally(() => setLoading(false));
-  }, []);
+
+    return () => controller.abort();
+  }, [refreshToken]);
 
   const statuses = useMemo(() => [...new Set(deliveries.map((delivery) => delivery.status))], [deliveries]);
   const visibleDeliveries = useMemo(() => deliveries
@@ -68,8 +83,10 @@ export default function AllDeliveriesPage() {
             <button type="button" onClick={() => setShowFilters((visible) => !visible)} className="flex h-9 items-center gap-3 rounded-[18px] border border-[#cccccc] bg-white px-4 text-[16px] text-[#343434]"><Filter className="h-4 w-4" />Filter</button>
             {showFilters && <select aria-label="Filter by status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="h-9 rounded-[18px] border border-[#cccccc] bg-white px-3 text-[14px]"><option value="all">All statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select>}
           </div>
-          <button type="button" className="rounded-[18px] bg-black px-4 py-2 text-[16px] text-[#cccccc]">+ Add Delivery</button>
+          <button type="button" onClick={() => { setError(""); setLoading(true); setRefreshToken((token) => token + 1); }} disabled={loading} className="flex items-center gap-2 rounded-[18px] bg-black px-4 py-2 text-[16px] text-[#cccccc] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />Refresh</button>
         </header>
+
+        {!loading && !error && <p className="mb-3 px-1 text-[13px] text-[#666]">Showing {visibleDeliveries.length} of {total} deliveries</p>}
 
         <div className="overflow-x-auto rounded-[15px]">
           <table className="w-full min-w-[900px] table-fixed text-[14px]">
