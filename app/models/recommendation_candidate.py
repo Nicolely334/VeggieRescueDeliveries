@@ -35,7 +35,7 @@ class RecommendationCandidate(Base):
         ),
         CheckConstraint(
             ("days_since_last_delivery IS NULL OR days_since_last_delivery >= 0"),
-            name="nonnegative_days_since_last_delivery",
+            name="nonnegative_delivery_days",
         ),
         CheckConstraint(
             "deliveries_last_30_days >= 0",
