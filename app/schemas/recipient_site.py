@@ -31,3 +31,8 @@ class RecipientSiteRead(RecipientSiteBase):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+
+
+class RecipientSiteListRead(RecipientSiteRead):
+    capacity_level: float | None = None
+    food_type: list[str] = Field(default_factory=list)
