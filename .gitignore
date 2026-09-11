@@ -21,3 +21,6 @@ htmlcov/
 data/raw/
 data/reports/
 .neon
+
+# Node.js
+node_modules/
