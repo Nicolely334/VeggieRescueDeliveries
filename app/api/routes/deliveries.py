@@ -59,9 +59,7 @@ def list_deliveries(
     total = db.scalar(select(func.count(Delivery.id)).where(*filters)) or 0
 
     delivery_order = (
-        Delivery.delivery_date.asc()
-        if sort == "oldest"
-        else Delivery.delivery_date.desc()
+        Delivery.delivery_date.asc() if sort == "oldest" else Delivery.delivery_date.desc()
     )
 
     delivery_rows = db.execute(
