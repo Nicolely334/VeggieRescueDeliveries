@@ -141,7 +141,7 @@ export default function Home() {
         </section>
 
         <section>
-          <div className="mb-[14px] flex items-center justify-between"><h2 className="text-[18px] font-normal">Today’s Deliveries</h2><Link href="/priorities" className="rounded-full bg-[#202020] px-[22px] py-[7px] text-[14px] text-white">View All</Link></div>
+          <div className="mb-[14px] flex items-center justify-between"><h2 className="text-[18px] font-normal">Today’s Deliveries</h2><Link href="/deliveries" className="rounded-full bg-[#202020] px-[22px] py-[7px] text-[14px] text-white">View All</Link></div>
           {loadingDeliveries && <p className="py-8 text-center text-[13px] text-[#666]">Loading today&apos;s deliveries...</p>}
           {!loadingDeliveries && deliveryError && <p className="py-8 text-center text-[13px] text-[#666]">Could not load today&apos;s deliveries.</p>}
           {!loadingDeliveries && !deliveryError && deliveryRows.length === 0 && <p className="py-8 text-center text-[13px] text-[#666]">No deliveries scheduled for today.</p>}

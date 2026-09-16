@@ -7,8 +7,8 @@ import { useState } from 'react';
 
 const navigation = [
   { name: 'Dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'All Deliveries', label: 'All Deliveries', href: '/priorities', icon: ClipboardList },
-  { name: 'Profiles', label: 'Profiles', href: '/deliveries', icon: Users },
+  { name: 'All Deliveries', label: 'All Deliveries', href: '/deliveries', icon: ClipboardList },
+  { name: 'Profiles', label: 'Profiles', href: '/profiles', icon: Users },
   { name: 'Food Intake', label: 'Food Intake', href: '/recipients', icon: ClipboardList },
   { name: 'Delivery Queue', label: 'Delivery Queue', href: '/driver', icon: Truck },
 ];
