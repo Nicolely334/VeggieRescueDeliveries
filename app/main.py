@@ -26,6 +26,9 @@ from app.api.routes.recipient_food_preferences import (
 from app.api.routes.recipient_sites import (
     router as recipient_sites_router,
 )
+from app.api.routes.recommendations import (
+    router as recommendations_router,
+)
 from app.core.config import get_settings
 from app.db.session import get_db
 
@@ -89,6 +92,10 @@ app.include_router(
 
 app.include_router(
     recipient_sites_router,
+    prefix="/api/v1",
+)
+app.include_router(
+    recommendations_router,
     prefix="/api/v1",
 )
 
