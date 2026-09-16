@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -26,6 +27,15 @@ class DonationOffer(Base):
             "pickup_by IS NULL OR available_from IS NULL OR pickup_by >= available_from",
             name="valid_pickup_window",
         ),
+        CheckConstraint(
+            "(source_system IS NULL) = (source_record_id IS NULL)",
+            name="complete_source_identity",
+        ),
+        UniqueConstraint(
+            "source_system",
+            "source_record_id",
+            name="donation_offer_source_record",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -38,6 +48,22 @@ class DonationOffer(Base):
         ForeignKey("farms.id"),
         nullable=False,
         index=True,
+    )
+    source_system: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+    )
+    source_record_id: Mapped[str | None] = mapped_column(
+        String(200),
+        nullable=True,
+    )
+    source_submitted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    source_row_fingerprint: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
     )
     status: Mapped[str] = mapped_column(
         String(20),
