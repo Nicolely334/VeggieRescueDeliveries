@@ -1,0 +1,12 @@
+---
+description: Keep visual deliverables accessible outside rendered Codex Canvas
+alwaysApply: true
+---
+
+# Accessible visual output
+
+- The user cannot view rendered Codex Canvas files; a `.canvas.tsx` file appears only as source code to them.
+- Do not use `.canvas.tsx` as the only user-facing visual or analytical deliverable.
+- For static architecture diagrams, roadmaps, flows, and graphs, prefer inline Mermaid that renders in the conversation.
+- When richer graphics are needed, provide an inline-visible image or another format the user can directly open.
+- If a Canvas is required by higher-level instructions, also provide the complete result in an accessible inline format.
