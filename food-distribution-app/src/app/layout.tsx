@@ -29,7 +29,6 @@ export default function RootLayout({
       className={`${figtree.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-row">
-        <Sidebar />
         <main className="min-w-0 flex-1 overflow-auto">{children}</main>
       </body>
     </html>

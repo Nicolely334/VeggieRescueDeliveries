@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useFetch } from "@/src/util/useFetch";
-import { ApiResponse } from "@/src/util/types/ApiResponse";
+import { getColumns } from "@/src/components/DataTable/getColumns";
 import { Recipient } from "@/src/types/Recipient";
 import { DataTable } from "@/src/components/DataTable/DataTable"
 import { SearchBar } from "@/src/components/SearchBar/SearchBar";
@@ -11,9 +11,11 @@ import styles from "./styles.module.css";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-export default function ProfilesPage() {
+export default function DeliveriesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [sortBy, setSortBy] = useState('');
+    const [sortAscending, setSortAscending] = useState(true);
 
     // Fetch when the search changes
         // Debounced so it doesn't search on every keystroke
@@ -28,24 +30,36 @@ export default function ProfilesPage() {
         }
     }, [searchTerm]);
 
-    // Assumes that the data returned is a JSON object containing a property
-        // with the specified array
-    const { data, isLoading, error } = useFetch<ApiResponse<Recipient[]>>(
+    const { data, isLoading, error } = useFetch<Recipient[]>(
         `${apiUrl}?query=${encodeURIComponent(debouncedSearch)}`
     );
 
+    // Set the values you want to display on the table
+    const columns = getColumns<Recipient>(data?.result ?? []);
+
+    // Handle sorting
+
+
     return (
-        <section className={styles.container}>
-            <SearchBar
-                value={searchTerm}
-                handleSearch={setSearchTerm}
-            />
-            <DataTable
-                data={data.result}
-                columns={columns}
-                isLoading={isLoading}
-                error={error}
-            />
-        </section>
+        <>
+            <h1 className={styles.header}>Deliveries</h1>
+            <div className={styles.tableGroup}>
+                <SearchBar
+                    value={searchTerm}
+                    columns={columns}
+                    sortByValue={sortBy}
+                    setSortByValue={setSortBy}
+                    sortAscending={sortAscending}
+                    setSortAscending={setSortAscending}
+                    handleSearch={setSearchTerm}
+                />
+                <DataTable
+                    data={data?.result ?? []}
+                    columns={columns}
+                    isLoading={isLoading}
+                    error={error}
+                />
+            </div>
+        </>
     )
 }

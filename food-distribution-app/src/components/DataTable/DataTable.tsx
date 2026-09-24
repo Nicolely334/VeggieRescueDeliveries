@@ -13,36 +13,34 @@ interface DataTableProps<T> {
 }
 
 export function DataTable<T>({ data, columns, isLoading, error }: DataTableProps<T>) {
-    if (isLoading) { 
-        return (<div>Loading data...</div>);
-    }
+    let message = '';
 
-    if (error) {
-        return (<div>Error while displaying data: {error}</div>)
+    if (isLoading) { 
+        message = "Loading data...";
+    } else if (error) {
+        message = `Error while displaying data: ${error}`;
+    }
+    else if (data.length <= 0) {
+        message = "No results found.";
     }
 
     return (
         <table className={styles.table}>
             <thead>
-                <tr>
+                <tr className={styles.header}>
                     {columns.map((col) => {
                         return <th key={String(col.key)}>{col.header}</th>
                     })}
                 </tr>
             </thead>
             <tbody>
-                {data.length <= 0 ? <tr><td colSpan={columns.length}>No results found.</td></tr> :
+                {message !== '' ? <tr><td colSpan={columns.length || 1}>{message}</td></tr> :
                 data.map((row, index) => {
                     return (
-                        <tr key={index}>
+                        <tr key={(row as { id: string }).id ?? index}>
                             {columns.map((col) => {
-                                const rawValue = row[col.key];
-                                let displayValue: string;
-
-                                if (rawValue === undefined || rawValue === null)
-                                    displayValue = '';
-                                else 
-                                    displayValue = String(row[col.key]);
+                                const isInvalidValue = row[col.key] === undefined || row[col.key] === null;
+                                const displayValue = isInvalidValue ? '' : String(row[col.key]);
 
                                 return (
                                     <td key={String(col.key)}>

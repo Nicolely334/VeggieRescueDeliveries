@@ -1,0 +1,11 @@
+.table {
+    td, th {
+        padding: .5rem;
+    }
+}
+
+.header {
+    background-color: lightgray;
+    height: 2rem;
+}
+
