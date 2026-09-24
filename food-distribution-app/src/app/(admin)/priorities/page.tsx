@@ -2,18 +2,7 @@
 
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Filter, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-
-type Delivery = {
-  id: string;
-  delivery_date: string;
-  recipient: string;
-  location: string;
-  produce_pounds: number | null;
-  packaged_pounds: number | null;
-  driver: string;
-  vehicle: string;
-  status: string;
-};
+import { Delivery } from "@/src/types/Delivery";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const pageSize = 200;

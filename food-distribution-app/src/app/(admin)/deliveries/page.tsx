@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useFetch } from "@/src/util/useFetch";
-import { getColumns } from "@/src/components/DataTable/getColumns";
-import { Recipient } from "@/src/types/Recipient";
-import { DataTable } from "@/src/components/DataTable/DataTable"
+import { Delivery } from "@/src/types/Delivery";
+import { Column, DataTable } from "@/src/components/DataTable/DataTable"
 import { SearchBar } from "@/src/components/SearchBar/SearchBar";
 
 import styles from "./styles.module.css";
@@ -30,12 +29,21 @@ export default function DeliveriesPage() {
         }
     }, [searchTerm]);
 
-    const { data, isLoading, error } = useFetch<Recipient[]>(
-        `${apiUrl}?query=${encodeURIComponent(debouncedSearch)}`
+    const { data, isLoading, error } = useFetch<Delivery[]>(
+        // `${apiUrl}?query=${encodeURIComponent(debouncedSearch)}`
+        `${apiUrl}/api/v1/deliveries?limit=${50}&offset=${0}&sort=${'newest'}`
     );
 
     // Set the values you want to display on the table
-    const columns = getColumns<Recipient>(data?.result ?? []);
+    const columns: Column<Delivery>[] = [
+        {key: "delivery_date", header: "Date"}, 
+        {key: "recipient", header: "Recipient"},
+        {key: "location", header: "Location"},
+        {key: "produce_pounds", header: "Produce (lbs.)"},
+        {key: "packaged_pounds", header: "Packaged (lbs.)"},
+        {key: "driver", header: "Driver"},
+        {key: "vehicle", header: "Vehicle"}
+    ]
 
     // Handle sorting
 
@@ -44,8 +52,8 @@ export default function DeliveriesPage() {
         <>
             <h1 className={styles.header}>Deliveries</h1>
             <div className={styles.tableGroup}>
-                <SearchBar
-                    value={searchTerm}
+                <SearchBar<Delivery>
+                    searchValue={searchTerm}
                     columns={columns}
                     sortByValue={sortBy}
                     setSortByValue={setSortBy}
@@ -53,7 +61,7 @@ export default function DeliveriesPage() {
                     setSortAscending={setSortAscending}
                     handleSearch={setSearchTerm}
                 />
-                <DataTable
+                <DataTable<Delivery>
                     data={data?.result ?? []}
                     columns={columns}
                     isLoading={isLoading}

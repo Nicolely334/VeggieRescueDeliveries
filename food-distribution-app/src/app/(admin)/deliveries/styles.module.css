@@ -12,5 +12,6 @@
     border: 1px solid lightgray;
     padding: 20px;
     border-radius: 20px;
-    height: 90%;
+    height: fit-content;
+    min-height: 90%;
 }

@@ -28,7 +28,8 @@ export function DataTable<T>({ data, columns, isLoading, error }: DataTableProps
         <table className={styles.table}>
             <thead>
                 <tr className={styles.header}>
-                    {columns.map((col) => {
+                    {columns.length <= 0 ? <th colSpan={1}></th> :
+                    columns.map((col) => {
                         return <th key={String(col.key)}>{col.header}</th>
                     })}
                 </tr>
